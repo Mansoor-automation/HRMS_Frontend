@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { EmployeeProfileModalComponent } from '../employee-profile-modal/employee-profile-modal.component';
 import { environment } from 'src/environments/environment';
+import { CandidateService } from 'src/app/services/pre-onboarding.service';
 
 @Component({
   selector: 'app-employee-list-modal',
@@ -12,15 +13,15 @@ import { environment } from 'src/environments/environment';
   templateUrl: './employee-list-modal.component.html',
   styleUrls: ['./employee-list-modal.component.scss'],
 })
-export class EmployeeListModalComponent implements OnInit {
 
+export class EmployeeListModalComponent implements OnInit {
   /** ✅ DATA FROM HEADER */
   @Input() employees: any[] = [];
 
   employeeList: any[] = [];
   apiBaseUrl: string = '';
 
-  constructor(private modalCtrl: ModalController) { }
+  constructor(private modalCtrl: ModalController, private candidateService: CandidateService) { }
 
   ngOnInit() {
     this.employeeList = this.employees || [];
@@ -34,43 +35,54 @@ export class EmployeeListModalComponent implements OnInit {
 
   /** ✅ PROFILE IMAGE HANDLER */
   getEmployeeImage(emp: any): string {
-
     if (emp?.profile_image) {
       return emp.profile_image.startsWith('http')
         ? emp.profile_image
         : `${this.apiBaseUrl}/${emp.profile_image}`;
     }
-
     if (emp?.image) {
       return emp.image.startsWith('http')
         ? emp.image
         : `${this.apiBaseUrl}/${emp.image}`;
     }
-
     // ✅ DEFAULT IMAGE
     return 'assets/icon/Default-user.svg';
   }
 
   /** OPEN EMPLOYEE PROFILE */
   async openEmployeeProfile(employee: any) {
-    // Normalize employee object for modal
-    const normalized = {
-      full_name: employee.full_name || employee.FullName || employee.first_name + ' ' + (employee.last_name || ''),
-      job_title: employee.job_title || employee.JobTitle || employee.designation || '',
-      location: employee.location || employee.Location || '',
-      work_email: employee.work_email || employee.workEmail || employee.email || '',
-      business_unit: employee.business_unit || employee.BusinessUnit || '',
-      department: employee.department || employee.Department || '',
-      reporting_to: employee.reporting_to || employee.ReportingManager || employee.reporting_manager || '',
-      active_status: employee.active_status || employee.status || '',
-      profile_image: employee.profile_image || employee.image || '',
-    };
-    const modal = await this.modalCtrl.create({
-      component: EmployeeProfileModalComponent,
-      componentProps: { selectedEmployee: normalized },
-      cssClass: 'profile-modal'
-    });
-    await modal.present();
+    // If we have an employee_id, fetch full details
+    const employeeId = employee.employee_id || employee.id;
+    if (employeeId) {
+      this.candidateService.getEmployeeById(employeeId.toString()).subscribe({
+        next: async (fullDetails: any) => {
+          // Use the full details directly
+          const modal = await this.modalCtrl.create({
+            component: EmployeeProfileModalComponent,
+            componentProps: { selectedEmployee: fullDetails },
+            cssClass: 'profile-modal'
+          });
+          await modal.present();
+        },
+        error: async () => {
+          // Fallback to original minimal data if fetch fails
+          const modal = await this.modalCtrl.create({
+            component: EmployeeProfileModalComponent,
+            componentProps: { selectedEmployee: employee },
+            cssClass: 'profile-modal'
+          });
+          await modal.present();
+        }
+      });
+    } else {
+      // No ID, fallback to original minimal data
+      const modal = await this.modalCtrl.create({
+        component: EmployeeProfileModalComponent,
+        componentProps: { selectedEmployee: employee },
+        cssClass: 'profile-modal'
+      });
+      await modal.present();
+    }
   }
 
   close() {
