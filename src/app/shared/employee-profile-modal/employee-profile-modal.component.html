@@ -33,6 +33,32 @@
 
 
 
+  <!-- Attendance Log -->
+  <div class="attendance-log">
+    <h2>Attendance Log</h2>
+    <ion-row style="font-weight:bold;">
+      <ion-col>Date</ion-col>
+      <ion-col>Check In</ion-col>
+      <ion-col>Check Out</ion-col>
+      <ion-col>Hours</ion-col>
+      <ion-col>Work Mode</ion-col>
+      <ion-col>Status</ion-col>
+    </ion-row>
+    <ng-container *ngIf="selectedEmployee?.attendance_summary?.recent_records?.length; else noAttendance">
+      <ion-row *ngFor="let record of selectedEmployee.attendance_summary.recent_records">
+        <ion-col>{{ record.attendance_date | date:'shortDate' }}</ion-col>
+        <ion-col>{{ record.first_check_in ? (record.first_check_in | date:'shortTime') : '-' }}</ion-col>
+        <ion-col>{{ record.last_check_out ? (record.last_check_out | date:'shortTime') : '-' }}</ion-col>
+        <ion-col>{{ record.total_hours }}</ion-col>
+        <ion-col>{{ record.work_mode }}</ion-col>
+        <ion-col>{{ record.status }}</ion-col>
+      </ion-row>
+    </ng-container>
+    <ng-template #noAttendance>
+      <ion-row><ion-col colspan="6">No attendance records found.</ion-col></ion-row>
+    </ng-template>
+  </div>
+
   <!-- Contact & Job Details -->
   <div class="org-details">
     <h2>Organizational Details</h2>

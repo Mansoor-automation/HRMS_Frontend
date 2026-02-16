@@ -21,12 +21,22 @@ export class EmployeeProfileModalComponent implements OnInit {
   ngOnInit() {
     // If the API response is { employee: {...}, ... }, use employee object for details
     this.selectedObeject = this.selectedEmployee?.employee || this.selectedEmployee;
-    // Try to get attendance status if employee_id is available
-    if (this.selectedObeject && (this.selectedObeject.employee_id || this.selectedObeject.id)) {
+
+    // Determine attendance status from last attendance log if available
+    const attendanceRecords = this.selectedEmployee?.attendance_summary?.recent_records;
+    if (attendanceRecords && attendanceRecords.length > 0) {
+      const last = attendanceRecords[0];
+      // If last record has check-in but no check-out, show 'In'; if both present, show 'Out'
+      if (last.first_check_in && !last.last_check_out) {
+        this.attendanceStatus = 'in';
+      } else {
+        this.attendanceStatus = 'out';
+      }
+    } else if (this.selectedObeject && (this.selectedObeject.employee_id || this.selectedObeject.id)) {
+      // Fallback: use attendanceService if no log available
       const empId = this.selectedObeject.employee_id || this.selectedObeject.id;
       this.attendanceService.checkLoginOrLoggedOut(empId).subscribe({
         next: (res: any) => {
-          console.log('Attendance status response for employee', empId, res);
           this.attendanceStatus = res?.status === 'in' ? 'in' : 'out';
         },
         error: () => {
