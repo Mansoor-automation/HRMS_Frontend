@@ -53,12 +53,23 @@ export class EmployeeListModalComponent implements OnInit {
 
   /** OPEN EMPLOYEE PROFILE */
   async openEmployeeProfile(employee: any) {
+    // Normalize employee object for modal
+    const normalized = {
+      full_name: employee.full_name || employee.FullName || employee.first_name + ' ' + (employee.last_name || ''),
+      job_title: employee.job_title || employee.JobTitle || employee.designation || '',
+      location: employee.location || employee.Location || '',
+      work_email: employee.work_email || employee.workEmail || employee.email || '',
+      business_unit: employee.business_unit || employee.BusinessUnit || '',
+      department: employee.department || employee.Department || '',
+      reporting_to: employee.reporting_to || employee.ReportingManager || employee.reporting_manager || '',
+      active_status: employee.active_status || employee.status || '',
+      profile_image: employee.profile_image || employee.image || '',
+    };
     const modal = await this.modalCtrl.create({
       component: EmployeeProfileModalComponent,
-      componentProps: { selectedEmployee: employee },
+      componentProps: { selectedEmployee: normalized },
       cssClass: 'profile-modal'
     });
-
     await modal.present();
   }
 
