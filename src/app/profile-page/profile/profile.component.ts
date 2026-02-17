@@ -4,7 +4,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-profile',
@@ -16,7 +16,6 @@ import { IonicModule } from '@ionic/angular';
     IonicModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule,
   ]
 })
 
@@ -28,7 +27,11 @@ export class ProfileComponent implements OnChanges {
   Isedit: boolean = false;
   isAdress: boolean = false;
   IsDetails: boolean = false;
-  constructor(private candidateService: CandidateService, private employeeService: EmployeeService) { }
+  constructor(
+    private candidateService: CandidateService,
+    private employeeService: EmployeeService,
+    private toastController: ToastController
+  ) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentEmployee']?.currentValue) {
@@ -56,13 +59,23 @@ export class ProfileComponent implements OnChanges {
     };
     this.employeeService.updateMyProfile(updatedData).subscribe({
       next: () => {
-        // Optionally refresh employee data or show success message
+        this.presentToast('Profile updated successfully!', 'success');
         this.IsDetails = false;
       },
       error: (err: any) => {
-        // Handle error
+        this.presentToast('Failed to update profile.', 'danger');
         console.error('Failed to update profile:', err);
       }
     });
+  }
+
+  async presentToast(message: string, color: 'success' | 'danger') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      color,
+      position: 'top'
+    });
+    toast.present();
   }
 }
