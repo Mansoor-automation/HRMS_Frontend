@@ -7,6 +7,20 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class EmployeeService {
+  /**
+   * Update logged-in employee profile via /profile/me endpoint
+   * @param updateData Fields to update
+   */
+  updateMyProfile(updateData: any): Observable<any> {
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+    return this.http.put(
+      this.profileEndpoint,
+      updateData,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+  }
   private env = environment;
   private readonly API_URL = `http://${this.env.apiURL}/api/employees`;
   //  private readonly API_URL = 'http://localhost:3000/api/employees';

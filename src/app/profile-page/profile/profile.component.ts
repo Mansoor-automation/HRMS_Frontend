@@ -1,5 +1,6 @@
-import { Component, Input, OnChanges, OnInit,SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CandidateService, Employee } from '../../services/pre-onboarding.service';
+import { EmployeeService } from '../../services/employee.service';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -27,7 +28,7 @@ export class ProfileComponent implements OnChanges {
   Isedit: boolean = false;
   isAdress: boolean = false;
   IsDetails: boolean = false;
-  constructor(private candidateService: CandidateService) { }
+  constructor(private candidateService: CandidateService, private employeeService: EmployeeService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentEmployee']?.currentValue) {
@@ -45,5 +46,23 @@ export class ProfileComponent implements OnChanges {
   }
   isEditAddress() {
     this.isAdress = !this.isAdress;
+  }
+
+  onSubmitDetails() {
+    if (!this.currentEmployee) return;
+    const updatedData: any = {
+      DateOfBirth: this.currentEmployee.DateOfBirth,
+      // Add other fields as needed
+    };
+    this.employeeService.updateMyProfile(updatedData).subscribe({
+      next: () => {
+        // Optionally refresh employee data or show success message
+        this.IsDetails = false;
+      },
+      error: (err: any) => {
+        // Handle error
+        console.error('Failed to update profile:', err);
+      }
+    });
   }
 }
