@@ -7,26 +7,23 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class EmployeeService {
-    /**
-     * Send a birthday wish to an employee
-     * @param employeeId The ID of the employee to wish
-     * @param message The wish message
-     */
-    wishBirthday(employeeId: number, message: string): Observable<any> {
-      const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-      const url = `http://${this.env.apiURL}/api/birthdays/wishes`;
-      const body = {
-        employee_id: employeeId,
-        message: message
-      };
-      return this.http.post(url, body, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          accept: 'application/json'
-        }
-      });
-    }
+  /**
+   * Send a birthday wish to an employee
+   */
+  sendBirthdayWish(employeeId: number, message: string): Observable<any> {
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+    const url = `http://${this.env.apiURL}/api/birthdays/wishes`;
+    return this.http.post(url, {
+      employee_id: employeeId,
+      message
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        accept: 'application/json'
+      }
+    });
+  }
   /**
    * Get birthdays list from /api/birthdays
    */
