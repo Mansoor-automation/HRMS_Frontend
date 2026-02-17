@@ -265,4 +265,8 @@ export class FinanceAdminComponent implements OnInit {
   adminManagement() {
     this.router.navigate(['/admin']);
   }
+
+  goToAdminDashboard() {
+    this.router.navigate(['/admin']);
+  }
 }
